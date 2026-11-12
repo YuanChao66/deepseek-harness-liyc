@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
-import ToolRuntime from '@deepseek-ai/dsh-tools'
+import ToolRuntime, { TOOL_ABORTED_BEFORE_DISPATCH } from '@deepseek-ai/dsh-tools'
 
 import * as riskAgent from '../src/index.ts'
 
@@ -72,6 +72,8 @@ describe('risk-agent 插件生命周期', () => {
 
     const result = await callHealth(ctx, controller.signal)
     expect(result.isError).toBe(true)
+    // 截止时间由外部 timeout policy 在 exec.signal 上实施；本插件只需原样转交该信号。
+    expect(result.error?.info).toMatchObject({ code: TOOL_ABORTED_BEFORE_DISPATCH })
     await ctx.fiber.dispose()
   })
 })

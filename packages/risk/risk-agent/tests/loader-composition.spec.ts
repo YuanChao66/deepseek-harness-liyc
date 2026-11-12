@@ -121,7 +121,7 @@ describe('risk-agent 真实 Loader 组合', () => {
 
   it('[ID_PENDING] 卸载插件条目后工具从注册表消失（动态注销）', async () => {
     const ctx = await boot()
-    const entry = ctx.loader.entries().find(e => e.options.name === '@deepseek-ai/dsh-risk-agent')
+    const entry = [...ctx.loader.entries()].find(e => e.options.name === '@deepseek-ai/dsh-risk-agent')
     expect(entry).toBeDefined()
 
     await entry!.fiber?.dispose()

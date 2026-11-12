@@ -11,7 +11,6 @@ import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 
-import type { MonitorHealthResult } from '../src/index.ts'
 import * as riskAgent from '../src/index.ts'
 
 let sequence = 0
@@ -45,13 +44,32 @@ function callHealth(ctx: Context, args: unknown) {
 }
 
 /**
- * 取出成功结果的契约值。
+ * 取出成功结果的契约值。工具结果值是 JSON，按对象形态显式收窄后再断言。
  * @param result - 归一化后的工具结果。
- * @returns 契约结果。
+ * @returns 结果对象。
  */
-function valueOf(result: Awaited<ReturnType<typeof callHealth>>): MonitorHealthResult {
+function valueOf(result: Awaited<ReturnType<typeof callHealth>>): { [key: string]: unknown } {
   if (result.isError) throw new Error('expected get_monitor_health success')
-  return result.value as MonitorHealthResult
+  const value = result.value
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new TypeError('expected get_monitor_health to return a JSON object')
+  }
+  return value
+}
+
+/**
+ * 读取 `plugin.uptimeSec`。
+ * @param value - 契约结果对象。
+ * @returns 插件已运行的秒数。
+ */
+function uptimeOf(value: { [key: string]: unknown }): number {
+  const plugin = value.plugin
+  if (typeof plugin !== 'object' || plugin === null || !('uptimeSec' in plugin)) {
+    throw new TypeError('expected plugin status object with uptimeSec')
+  }
+  const uptimeSec = plugin.uptimeSec
+  if (typeof uptimeSec !== 'number') throw new TypeError('expected numeric uptimeSec')
+  return uptimeSec
 }
 
 function textOf(result: { content: { type: string; text?: string }[] }): string {
@@ -73,11 +91,13 @@ describe('get_monitor_health', () => {
     const ctx = await setup()
     const value = valueOf(await callHealth(ctx, {}))
 
-    expect(value.health).toBe('UNKNOWN')
-    expect(value.plugin.status).toBe('RUNNING')
-    expect(value.plugin.uptimeSec).toBeGreaterThanOrEqual(0)
-    expect(value.dataSources).toEqual([])
-    expect(value.coverage).toEqual({ configured: 0, enabled: 0, normal: 0, degraded: 0 })
+    expect(value).toMatchObject({
+      health: 'UNKNOWN',
+      plugin: { status: 'RUNNING' },
+      dataSources: [],
+      coverage: { configured: 0, enabled: 0, normal: 0, degraded: 0 },
+    })
+    expect(uptimeOf(value)).toBeGreaterThanOrEqual(0)
     await ctx.fiber.dispose()
   })
 
@@ -89,9 +109,11 @@ describe('get_monitor_health', () => {
       tenantId: 'ignored-hint',
     }))
 
-    expect(value.health).toBe('UNKNOWN')
-    expect(value.dataSources).toEqual([])
-    expect(value.coverage).toEqual({ configured: 0, enabled: 0, normal: 0, degraded: 0 })
+    expect(value).toMatchObject({
+      health: 'UNKNOWN',
+      dataSources: [],
+      coverage: { configured: 0, enabled: 0, normal: 0, degraded: 0 },
+    })
     await ctx.fiber.dispose()
   })
 
@@ -122,10 +144,12 @@ describe('get_monitor_health', () => {
     const first = valueOf(await callHealth(ctx, {}))
     const second = valueOf(await callHealth(ctx, {}))
 
-    expect(second.health).toBe(first.health)
-    expect(second.dataSources).toEqual(first.dataSources)
-    expect(second.coverage).toEqual(first.coverage)
-    expect(second.plugin.uptimeSec).toBeGreaterThanOrEqual(first.plugin.uptimeSec)
+    expect(second).toMatchObject({
+      health: first.health,
+      dataSources: first.dataSources,
+      coverage: first.coverage,
+    })
+    expect(uptimeOf(second)).toBeGreaterThanOrEqual(uptimeOf(first))
     await ctx.fiber.dispose()
   })
 })
