@@ -1,0 +1,43 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/risk/risk-agent/README.md
+/:
+  en: 2d7d05c23152ece9
+  zh: 0a083f4a5f5c54fb
+/deepseek-ai-dsh-risk-agent:
+  en: aafca03ab0f6af1b
+  zh: ec08869fc11e765d
+/deepseek-ai-dsh-risk-agent/summary:
+  en: cbb366ec6350ba2f
+  zh: aafcacce973db173
+/deepseek-ai-dsh-risk-agent/table-of-contents:
+  en: 47b5d5934dd2a7ea
+  zh: 47b5d5934dd2a7ea
+/deepseek-ai-dsh-risk-agent/use-this-package:
+  en: 2eec5ff0513cd704
+  zh: a3cfe598ae4971ce
+/deepseek-ai-dsh-risk-agent/understand-the-implementation:
+  en: 181af64c6569a3a7
+  zh: 027bfbc27c76cb45
+/deepseek-ai-dsh-risk-agent/dev-note:
+  en: a6cbbc47522884bc
+  zh: d5dd945216553190
+/deepseek-ai-dsh-risk-agent/model-experience:
+  en: 215e7ba838619b7b
+  zh: 215e7ba838619b7b
+/deepseek-ai-dsh-risk-agent/model-experience/get-monitor-health-tool:
+  en: 7abf20e4dc3a1ef5
+  zh: 7abf20e4dc3a1ef5
+/deepseek-ai-dsh-risk-agent/model-experience/get-monitor-health-tool/what-the-model-sees:
+  en: abca9c438208a809
+  zh: 82fe36f02c159447
+/deepseek-ai-dsh-risk-agent/model-experience/get-monitor-health-tool/token-effect:
+  en: 59c89209514d0b53
+  zh: 5f5cea2804363ee7
+/deepseek-ai-dsh-risk-agent/model-experience/get-monitor-health-tool/kv-cache-effect:
+  en: e865f95ebe03750b
+  zh: 5fc40975bd0df977
+/deepseek-ai-dsh-risk-agent/known-limitations-and-deferred-work:
+  en: 9e31c7d10e4da07c
+  zh: 10676e9fe5de2481
