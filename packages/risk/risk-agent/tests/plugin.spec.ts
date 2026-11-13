@@ -12,6 +12,7 @@ import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime, { TOOL_ABORTED_BEFORE_DISPATCH } from '@deepseek-ai/dsh-tools'
 
 import * as riskAgent from '../src/index.ts'
+import { minimalConfig } from './config-fixture.ts'
 
 let sequence = 0
 
@@ -25,7 +26,7 @@ async function setup(): Promise<{ ctx: Context; fiber: ReturnType<Context['plugi
   await ctx.plugin(SystemPrompt)
   await ctx.plugin(ToolRuntime)
   await ctx.plugin(NativeToolExecutor)
-  const fiber = ctx.plugin(riskAgent)
+  const fiber = ctx.plugin(riskAgent, minimalConfig())
   await fiber
   return { ctx, fiber }
 }

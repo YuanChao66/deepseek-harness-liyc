@@ -1,5 +1,5 @@
 /**
- * tools 层入口：模型侧工具定义的对外门面。
+ * tools 层门面。
  * @module
  */
 
@@ -10,4 +10,5 @@ export type {
   MonitorHealthResult,
   MonitorPluginStatus,
   MonitoringCoverage,
+  TenantResolver,
 } from './get-monitor-health.ts'

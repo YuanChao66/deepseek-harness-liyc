@@ -19,6 +19,7 @@ import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 
 import * as RiskAgent from '../src/index.ts'
+import { minimalConfig } from './config-fixture.ts'
 
 let root: string | undefined
 let context: Context | undefined
@@ -42,6 +43,8 @@ async function boot(): Promise<Context> {
     "- name: '@deepseek-ai/dsh-tools'",
     "- name: '@deepseek-ai/dsh-tool-executor-native'",
     "- name: '@deepseek-ai/dsh-risk-agent'",
+    // JSON 是 YAML 的子集，直接内联 fixture 以保持最小合法配置的单点定义。
+    `  config: ${JSON.stringify(minimalConfig())}`,
     '',
   ].join('\n'))
 
@@ -104,7 +107,7 @@ function callHealth(ctx: Context, args: unknown, signal: AbortSignal = new Abort
 }
 
 describe('risk-agent 真实 Loader 组合', () => {
-  it('[ID_PENDING] cordis.yml 无配置装载成功，工具可发现且零组件调用返回契约结果', async () => {
+  it('[ID_PENDING] cordis.yml 携带最小配置装载成功，工具可发现且零组件调用返回契约结果', async () => {
     const ctx = await boot()
     expect(ctx.tools.schemas().some(s => s.name === 'get_monitor_health')).toBe(true)
 

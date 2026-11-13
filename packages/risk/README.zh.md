@@ -21,7 +21,7 @@ kind: package-group
 
 | Package | Role |
 |---|---|
-| [`risk-agent/`](risk-agent/README.md) | 风险监控 Agent 插件：当前提供只读工具 `get_monitor_health` |
+| [`risk-agent/`](risk-agent/README.zh.md) | 风险监控 Agent 插件：当前提供只读工具 `get_monitor_health` |
 
 ## Related documentation
 

@@ -12,6 +12,7 @@ import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 
 import * as riskAgent from '../src/index.ts'
+import { minimalConfig } from './config-fixture.ts'
 
 let sequence = 0
 
@@ -24,7 +25,7 @@ async function setup(): Promise<Context> {
   await ctx.plugin(SystemPrompt)
   await ctx.plugin(ToolRuntime)
   await ctx.plugin(NativeToolExecutor)
-  await ctx.plugin(riskAgent)
+  await ctx.plugin(riskAgent, minimalConfig())
   return ctx
 }
 
@@ -106,7 +107,6 @@ describe('get_monitor_health', () => {
     const value = valueOf(await callHealth(ctx, {
       components: ['nonexistent-component'],
       dataSources: ['nonexistent-source'],
-      tenantId: 'ignored-hint',
     }))
 
     expect(value).toMatchObject({
@@ -114,6 +114,15 @@ describe('get_monitor_health', () => {
       dataSources: [],
       coverage: { configured: 0, enabled: 0, normal: 0, degraded: 0 },
     })
+    await ctx.fiber.dispose()
+  })
+
+  it('[ID_PENDING] 声称的租户与可信身份不一致时返回失败且不泄露数据', async () => {
+    const ctx = await setup()
+    const result = await callHealth(ctx, { tenantId: 'forged-tenant' })
+
+    expect(result.isError).toBe(true)
+    expect(textOf(result)).not.toContain('forged-tenant')
     await ctx.fiber.dispose()
   })
 

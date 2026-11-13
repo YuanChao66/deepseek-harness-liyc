@@ -7,6 +7,12 @@
 
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { ToolDefinition } from '@deepseek-ai/dsh-tools'
+import type { TenantContext } from '../domain/index.ts'
+
+/**
+ * 由可信入口建立租户上下文；`claimedTenantId` 只用于与可信身份比对。
+ */
+export type TenantResolver = (claimedTenantId?: string) => TenantContext
 
 /** 监控健康状态的全部合法取值（单点定义，DOC-03 §6）。 */
 export const MONITOR_HEALTH_VALUES = ['HEALTHY', 'DEGRADED', 'UNHEALTHY', 'UNKNOWN'] as const
@@ -74,12 +80,14 @@ export function zeroMonitorHealth(startedAt: number, now: number): MonitorHealth
 }
 
 /**
- * 构造 `get_monitor_health` 工具定义。工具为只读、幂等；骨架阶段忽略全部过滤入参，
- * `tenantId` 仅为契约保留字段，不作为租户依据（红线 4：租户必须来自可信入口）。
+ * 构造 `get_monitor_health` 工具定义。工具为只读、幂等；过滤入参仍为契约保留字段，
+ * `tenantId` 只作为「声称值」交给可信入口比对，绝不作为租户依据（红线 4）。
+ * 比对失败会抛出 `AuthorizationError`，由工具执行层转为失败结果。
  * @param startedAt - 插件装载时刻（Unix 毫秒），用于计算 uptimeSec。
+ * @param resolveTenant - 可信入口提供的租户上下文解析器。
  * @returns 可注册的工具定义。
  */
-export function defineGetMonitorHealthTool(startedAt: number): ToolDefinition {
+export function defineGetMonitorHealthTool(startedAt: number, resolveTenant: TenantResolver): ToolDefinition {
   return defineTool({
     name: 'get_monitor_health',
     description:
@@ -99,7 +107,7 @@ export function defineGetMonitorHealthTool(startedAt: number): ToolDefinition {
       },
       tenantId: {
         type: 'string',
-        description: 'Reserved contract hint, accepted and ignored; tenancy comes from the trusted entry, never from tool arguments.',
+        description: 'Optional tenant claim; must match the trusted tenant identity or the call is rejected.',
       },
     },
     output: {
@@ -156,7 +164,8 @@ export function defineGetMonitorHealthTool(startedAt: number): ToolDefinition {
       }],
     },
     // oxlint-disable-next-line typescript/require-await -- 工具 execute 契约返回 Promise；骨架阶段快照是同步读取。
-    async execute(_args, _exec) {
+    async execute(args, _exec) {
+      resolveTenant(args.tenantId)
       return zeroMonitorHealth(startedAt, Date.now())
     },
   })

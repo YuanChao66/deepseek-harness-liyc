@@ -130,8 +130,21 @@ describe('分层红线（AGENTS.md §2 第 1～3 条）', () => {
   it('[ID_PENDING] 扫描确实覆盖了现有源文件', () => {
     const files = collectSources(SRC).map(file => file.slice(SRC.length + 1).split(sep).join('/')).sort()
     expect(files).toEqual([
+      'application/config/audit.ts',
+      'application/config/index.ts',
+      'application/config/schema.ts',
+      'application/config/service.ts',
+      'application/config/snapshot.ts',
+      'application/config/validation.ts',
+      'application/security/index.ts',
+      'domain/index.ts',
+      'domain/tenant/index.ts',
       'index.ts',
+      'plugin/composition/index.ts',
       'plugin/index.ts',
+      'shared/errors/index.ts',
+      'shared/index.ts',
+      'shared/types/index.ts',
       'tools/get-monitor-health.ts',
       'tools/index.ts',
     ])
