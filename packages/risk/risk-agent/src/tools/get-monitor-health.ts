@@ -163,10 +163,9 @@ export function defineGetMonitorHealthTool(startedAt: number, resolveTenant: Ten
           + `data sources: ${value.dataSources.length}`,
       }],
     },
-    // oxlint-disable-next-line typescript/require-await -- 工具 execute 契约返回 Promise；骨架阶段快照是同步读取。
-    async execute(args, _exec) {
+    execute(args, _exec) {
       resolveTenant(args.tenantId)
-      return zeroMonitorHealth(startedAt, Date.now())
+      return Promise.resolve(zeroMonitorHealth(startedAt, Date.now()))
     },
   })
 }

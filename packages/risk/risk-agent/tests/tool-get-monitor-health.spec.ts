@@ -12,7 +12,7 @@ import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 
 import * as riskAgent from '../src/index.ts'
-import { minimalConfig } from './config-fixture.ts'
+import { resolvedConfig } from './config-fixture.ts'
 
 let sequence = 0
 
@@ -25,7 +25,7 @@ async function setup(): Promise<Context> {
   await ctx.plugin(SystemPrompt)
   await ctx.plugin(ToolRuntime)
   await ctx.plugin(NativeToolExecutor)
-  await ctx.plugin(riskAgent, minimalConfig())
+  await ctx.plugin(riskAgent, resolvedConfig())
   return ctx
 }
 

@@ -4,6 +4,9 @@
  * 这里先给出可校验的占位值；定稿后在这两处回填，并同步 DOC-14。
  */
 
+import { validateConfig } from '../src/application/config/index.ts'
+import type { ResolvedConfig } from '../src/application/config/index.ts'
+
 /** TBD-001 回填点：告警阈值的占位值。 */
 export const TBD_001_ALERT_THRESHOLDS: Readonly<Record<string, number>> = { 'collection.queue.lag': 100 }
 
@@ -21,6 +24,18 @@ export function minimalConfig(overrides: Record<string, unknown> = {}): Record<s
     observability: { alertThresholds: { ...TBD_001_ALERT_THRESHOLDS } },
     ...overrides,
   }
+}
+
+/**
+ * 构造已通过 Schema 校验的完整配置。
+ * 装载点要求完整的配置类型，而 `minimalConfig` 只给出必填项与默认值的原始值。
+ * @param overrides - 顶层字段覆盖。
+ * @returns 默认值已注入的配置。
+ */
+export function resolvedConfig(overrides: Record<string, unknown> = {}): ResolvedConfig {
+  const result = validateConfig(minimalConfig(overrides))
+  if (!result.ok) throw result.error
+  return result.value
 }
 
 /**
